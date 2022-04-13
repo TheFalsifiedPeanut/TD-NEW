@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public enum EnemyState
 {
@@ -8,20 +9,34 @@ public enum EnemyState
     Searching,
     Delivering,
     Stealing,
-    Moving
+    Moving,
+    Attacking
 }
 
 public class Enemy : Unit
 {
-    [SerializeField] GameObject unitTarget;
     [SerializeField] EnemyState enemyState;
     [SerializeField] int stealAmount;
     [SerializeField] float stealSpeed;
     [SerializeField] int supplyStash;
-    [SerializeField] SupplyTower targetSupplyTower;
     [SerializeField] SupplyTowerManager supplyTowerManager;
-    [SerializeField] EnemyBase targetEnemyBase;
-    [SerializeField] float currentTime = 0;
+    SupplyTower targetSupplyTower;
+    EnemyBase targetEnemyBase;
+    float currentStealTime;
+    Action<Enemy> onDeath;
+    List<Worker> attackedWorkers;
+    DetectWorker detectWorker;
+    CircleCollider2D circleCollider2D;
+
+    public void SubscribeToOnDeath(Action<Enemy> onDeath)
+    {
+        this.onDeath += onDeath;
+    }
+    protected override void Death()
+    {
+        base.Death();
+        onDeath?.Invoke(this);
+    }
 
     void PerformState()
     {
@@ -33,23 +48,23 @@ public class Enemy : Unit
                 if (targetingCondition == TargetingCondition.MoveToBase)
                 {
                     targetSupplyTower = null;
+
                     SupplyTower[] targetSupplyTowers = FindObjectsOfType<SupplyTower>();
                     if (targetSupplyTowers != null && targetSupplyTowers.Length > 0)
                     {
-                        targetSupplyTower = targetSupplyTowers[Random.Range(0, targetSupplyTowers.Length)];
+                        targetSupplyTower = targetSupplyTowers[UnityEngine.Random.Range(0, targetSupplyTowers.Length)];
                         targetWaypoint = targetSupplyTower;
                         MoveToBase();
                     }
-                    
+
                 }
-                else if(targetingCondition == TargetingCondition.MoveToEnemyBase)
+                else if (targetingCondition == TargetingCondition.MoveToEnemyBase)
                 {
                     targetEnemyBase = null;
                     EnemyBase[] targetEnemyBases = FindObjectsOfType<EnemyBase>();
-                    Debug.Log(targetEnemyBases.Length);
                     if (targetEnemyBases != null && targetEnemyBases.Length > 0)
                     {
-                        targetEnemyBase = targetEnemyBases[Random.Range(0, targetEnemyBases.Length)];
+                        targetEnemyBase = targetEnemyBases[UnityEngine.Random.Range(0, targetEnemyBases.Length)];
                         targetWaypoint = targetEnemyBase;
                         MoveToEnemyBase();
                     }
@@ -57,9 +72,8 @@ public class Enemy : Unit
                 enemyState = EnemyState.Moving;
                 break;
             case EnemyState.Delivering:
-                Debug.Log("Delivering " + supplyStash);
                 if (targetEnemyBase != null)
-                { 
+                {
                     targetEnemyBase.AddEnemyBaseSupply(supplyStash);
                 }
                 supplyStash = 0;
@@ -67,11 +81,11 @@ public class Enemy : Unit
                 targetingCondition = TargetingCondition.MoveToBase;
                 break;
             case EnemyState.Stealing:
-                currentTime += Time.deltaTime;
-                if (currentTime >= stealSpeed)
+                currentStealTime += Time.deltaTime;
+                if (currentStealTime >= stealSpeed)
                 {
                     supplyStash = supplyTowerManager.RemoveSupply(stealAmount);
-                    currentTime = 0;
+                    currentStealTime = 0;
                     enemyState = EnemyState.Searching;
                     targetingCondition = TargetingCondition.MoveToEnemyBase;
                     //currentWaypoint.TrackSearch(this, currentWaypoint, new PathData());
@@ -79,38 +93,61 @@ public class Enemy : Unit
                 break;
             case EnemyState.Moving:
                 break;
+            case EnemyState.Attacking:
+                Worker worker = movementTarget.GetComponent<Worker>();
+                worker.RemoveHealth(1);
+                attackedWorkers.Add(worker);
+                enemyState = EnemyState.Searching;
+                targetingCondition = TargetingCondition.MoveToBase;
+                movementTarget = null;
+                currentWaypoint = FindObjectOfType<EnemyBase>();
+                break;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-       
-        currentWaypoint = collision.GetComponent<Waypoint>();
-        if (currentWaypoint)
+        
+        if (collision.gameObject == movementTarget)
         {
-            switch (targetingCondition)
+            currentWaypoint = collision.GetComponent<Waypoint>();
+            if (currentWaypoint)
             {
-                case TargetingCondition.Waypoint:
-                    break;
-                case TargetingCondition.MoveToBase:
-                    
-                    MoveToBase();
+                switch (targetingCondition)
+                {
+                    case TargetingCondition.Waypoint:
+                        break;
+                    case TargetingCondition.MoveToBase:
 
-                    break;
-                case TargetingCondition.MoveToEnemyBase:
+                        MoveToBase();
 
-                    MoveToEnemyBase();
+                        break;
+                    case TargetingCondition.MoveToEnemyBase:
+                        attackedWorkers.Clear();
+                        MoveToEnemyBase();
+                        break;
+                    case TargetingCondition.MoveToResource:
+                        break;
+                    case TargetingCondition.Idle:
+                        break;
 
-                    break;
-                case TargetingCondition.MoveToResource:
-                    break;
-                case TargetingCondition.Idle:
-                    break;
-                
-                default:
-                    break;
+                    default:
+                        break;
+                }
+            }
+            
+        }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject == movementTarget)
+        {
+            if (collision.gameObject.GetComponent<Worker>())
+            {
+                enemyState = EnemyState.Attacking;
             }
         }
+        
     }
     void MoveToBase()
     {
@@ -129,11 +166,9 @@ public class Enemy : Unit
             TargetableWaypoint targetableWaypoint = targetableWaypoints.Find((x) => x.targetWaypoint == targetWaypoint);
             if (targetableWaypoint.targetWaypoint != null)
             {
-                Debug.Log("Start");
                 if (targetableWaypoint.waypoints != null)
                 {
-                    Debug.Log("End");
-                    movementTarget = targetableWaypoint.waypoints[Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
+                    movementTarget = targetableWaypoint.waypoints[UnityEngine.Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
                 }
             }
         }
@@ -152,18 +187,22 @@ public class Enemy : Unit
             TargetableWaypoint targetableWaypoint = targetableWaypoints.Find((x) => x.targetWaypoint == targetWaypoint);
             if (targetableWaypoint.targetWaypoint)
             {
-                Debug.Log("Thing");
 
                 if (targetableWaypoint.waypoints != null)
                 {
-                    movementTarget = targetableWaypoint.waypoints[Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
+                    movementTarget = targetableWaypoint.waypoints[UnityEngine.Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
                 }
             }
         }
     }
     private void Start()
     {
+        detectWorker = GetComponentInChildren<DetectWorker>();
+        detectWorker.SubscribeToDetectWorker(WorkerDetected);
         targetingCondition = TargetingCondition.MoveToBase;
+        supplyTowerManager = FindObjectOfType<SupplyTowerManager>();
+        currentWaypoint = FindObjectOfType<EnemyBase>();
+        attackedWorkers = new List<Worker>();
     }
     protected override void Update()
     {
@@ -171,6 +210,20 @@ public class Enemy : Unit
         if (enemyState == EnemyState.Moving)
         {
             base.Update();
+        }
+    }
+    void WorkerDetected(Worker worker)
+    {
+        
+        if (movementTarget)
+        {
+            if (supplyStash == 0 && !movementTarget.GetComponent<Worker>() && !attackedWorkers.Contains(worker) && (enemyState == EnemyState.Idling || enemyState == EnemyState.Moving))
+            {
+                targetingCondition = TargetingCondition.MoveToUnit;
+                enemyState = EnemyState.Moving;
+                movementTarget = worker.gameObject;
+
+            }
         }
     }
 }

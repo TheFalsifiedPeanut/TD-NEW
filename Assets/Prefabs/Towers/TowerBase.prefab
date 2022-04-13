@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5950690595704728867}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: TowerOptions
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 5950690595797196238}
   - component: {fileID: 5950690595797196233}
   - component: {fileID: 5950690595797196232}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PiercingTower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -146,7 +146,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -174,7 +174,7 @@ GameObject:
   - component: {fileID: 5950690596474239591}
   - component: {fileID: 5950690596474239590}
   - component: {fileID: 5950690596474239585}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: TowerBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -261,6 +261,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba9dde911e9cbbd4098d2d41f1f8c8f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnemyBaseWaypoints: []
+  baseWaypoints: []
+  smartBaseWaypoints: []
+  resourceWaypoints: []
+  towerWaypoints: []
   UI: {fileID: 5950690595704728866}
 --- !u!58 &5950690596474239585
 CircleCollider2D:
@@ -290,7 +295,7 @@ GameObject:
   - component: {fileID: 5950690596636405366}
   - component: {fileID: 5950690596636405361}
   - component: {fileID: 5950690596636405360}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: T-3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -389,7 +394,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -417,7 +422,7 @@ GameObject:
   - component: {fileID: 5950690596868854296}
   - component: {fileID: 5950690596868854299}
   - component: {fileID: 5950690596868854298}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ProjectileTower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -516,7 +521,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -544,7 +549,7 @@ GameObject:
   - component: {fileID: 5950690597100752104}
   - component: {fileID: 5950690597100752107}
   - component: {fileID: 5950690597100752106}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: T-4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -643,7 +648,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}

@@ -25,6 +25,10 @@ public class Tower : MonoBehaviour
     /// Cost of maintenance.
     /// </summary>
     [SerializeField] int supplyLoss;
+    /// <summary>
+    /// How often supplyLoss occurs.
+    /// </summary>
+    [SerializeField] float supplyDrainTimer;
     /// <summary>;
     /// Maximum amount of supply a tower can hold.
     /// </summary>
@@ -34,13 +38,35 @@ public class Tower : MonoBehaviour
     /// </summary>
     [SerializeField] int currentSupply;
     /// <summary>
-    /// A flag to tell us if an action is possible.
+    /// Undelivered supply designated to the tower by a worker.
+    /// </summary>
+    [SerializeField] int promisedSupply;
+    /// <summary>
+    /// A flag that determines when an action occurs.
     /// </summary>
     bool canAction;
+    /// <summary>
+    /// A flag that determines when supply drain can occur.
+    /// </summary>
+    bool canDrain;
+    
+    public  int GetCurrentSupply()
+    {
+        return currentSupply;
+    }public  int GetMaxSupply()
+    {
+        return maxSupply;
+    }
+    public int GetPromisedSupply()
+    {
+        return promisedSupply;
+    }
+    
     // Start is called before the first frame update
     protected virtual void Start()
     {
         canAction = true;
+        canDrain = true;
     }
 
     // Update is called once per frame
@@ -51,17 +77,58 @@ public class Tower : MonoBehaviour
             Action();
             StartCoroutine(ActionCooldown());
         }
+        if (canDrain)
+        {
+            Drain();
+            StartCoroutine(SupplyDrainCooldown());
+        }
     }
 
     protected virtual void Action()
     {
-
+        
+    }
+    protected virtual void Drain()
+    { 
+        currentSupply -= supplyLoss;
+        if (currentSupply < 0)
+        {
+            currentSupply = 0;
+        }
+        
     }
     IEnumerator ActionCooldown()
     {
         canAction = false;
         yield return new WaitForSeconds(rateOfAction);
         canAction = true;
+    }
+    IEnumerator SupplyDrainCooldown()
+    {
+
+        canDrain = false;
+        yield return new WaitForSeconds(supplyDrainTimer);
+        canDrain = true;
+    }
+    public int AddSupply(int supplyToBeAdded)
+    {
+        promisedSupply -= supplyToBeAdded;
+        if (currentSupply + supplyToBeAdded > maxSupply)
+        {
+            int remainder = currentSupply + supplyToBeAdded - maxSupply;
+            currentSupply = maxSupply;
+            return remainder;
+        }
+        else
+        {
+            currentSupply += supplyToBeAdded;
+            return 0;
+        }
+        
+    }
+    public void AddPromisedSupply(int supplyToBePromised)
+    {
+        promisedSupply += supplyToBePromised;
     }
 }
 

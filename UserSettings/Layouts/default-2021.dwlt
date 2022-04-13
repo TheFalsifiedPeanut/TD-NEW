@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1536
     height: 822
   m_ShowMode: 4
-  m_Title: Game
+  m_Title: Console
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 234
+  controlID: 11422
 --- !u!114 &3
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 235
+  controlID: 11396
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 236
+  controlID: 11397
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -317,22 +317,22 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts
+    - Assets/Prefabs
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scripts
+  - Assets/Prefabs
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\georg\Documents\GitHub\TD
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 86610000
-    m_LastClickedID: 24966
-    m_ExpandedIDs: 00000000706100008661000000ca9a3b
+    m_SelectedIDs: 2a610000
+    m_LastClickedID: 24874
+    m_ExpandedIDs: 000000001a61000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -360,7 +360,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000007061000000ca9a3b
+    m_ExpandedIDs: 000000001a61000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -385,9 +385,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: c45f0000965e00002c60000084600000e25e00005e5f00009a5f00002a5f0000745e0000ba5f0000da5f0000685f00002260000064600000d45e0000
-    m_LastClickedInstanceID: 24516
-    m_HadKeyboardFocusLastEvent: 1
+    m_SelectedInstanceIDs: 085f0000
+    m_LastClickedInstanceID: 24328
+    m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c6230000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -487,10 +487,10 @@ MonoBehaviour:
     m_SaveData: []
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 528.4}
-      m_SelectedIDs: 12600000b8600000765f0000bc5e0000a45f00000e5f0000
-      m_LastClickedID: 24334
-      m_ExpandedIDs: 1afbffff42fbffffde5e0000425f0000725f0000b65f00000e600000
+      scrollPos: {x: 0, y: 0}
+      m_SelectedIDs: cc5f0000
+      m_LastClickedID: 24524
+      m_ExpandedIDs: 96a9ffffc4aeffff1afbffff42fbffffcc5e00006a5f0000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -547,9 +547,9 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: -101, y: -26}
       snapOffsetDelta: {x: 0, y: 0}
-      snapCorner: 0
+      snapCorner: 3
       id: Tool Settings
       index: 0
       layout: 1
@@ -558,9 +558,9 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 149}
+      snapOffset: {x: -141, y: 149}
       snapOffsetDelta: {x: 0, y: 0}
-      snapCorner: 0
+      snapCorner: 1
       id: unity-grid-and-snap-toolbar
       index: 1
       layout: 1
@@ -761,9 +761,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 0.15898913, y: 0.39351055, z: -0.97761893}
+    m_Target: {x: 4.8468795, y: -4.4983287, z: -0.1555167}
     speed: 2
-    m_Value: {x: 0.15898913, y: 0.39351055, z: -0.97761893}
+    m_Value: {x: 4.355194, y: -4.449053, z: -0.15002136}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -814,9 +814,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 12.129214
+    m_Target: 12.761335
     speed: 2
-    m_Value: 12.129214
+    m_Value: 12.211804
   m_Ortho:
     m_Target: 1
     speed: 2

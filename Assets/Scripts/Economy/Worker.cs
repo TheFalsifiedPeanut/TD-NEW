@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public enum WorkerState
 {
@@ -14,65 +15,136 @@ public enum WorkerState
 public class Worker : Unit
 {
     [SerializeField] WorkerState workerState;
-    [SerializeField] GameObject resourceTarget;
-    [SerializeField] Resource resource;
     [SerializeField] int harvestAmount;
     [SerializeField] float harvestSpeed;
     [SerializeField] int supplyStash;
-    SupplyTower supplyTowerTarget;
-    float currentTime;
-    Waypoint currentWaypoint;
+    [SerializeField] SupplyTowerManager supplyTowerManager;
+    SupplyTower targetSupplyTower;
+    Resource targetResource;
+    Tower targetTower;
+    float currentHarvestTime;
+    Action<Worker> onDeath;
 
-    private void OnEnable()
+    public void SubscribeToOnDeath(Action<Worker> onDeath)
     {
-        workerState = WorkerState.Searching;
+        this.onDeath += onDeath;
     }
+    protected override void Death()
+    {
+        base.Death();
+        onDeath?.Invoke(this);
+    }
+
     void PerformState()
     {
-        
+
         switch (workerState)
         {
 
             case WorkerState.Searching:
-                resourceTarget = null;
-                Resource[] resources = FindObjectsOfType<Resource>();
-                float minMagnitudeDistance = Mathf.Infinity;
-                for (int i = 0; i < resources.Length; i++)
+                if (targetingCondition == TargetingCondition.MoveToTower)
                 {
-                    Vector3 offset = resources[i].transform.position - transform.position;
-                    if (offset.sqrMagnitude < minMagnitudeDistance)
+                    targetTower = null;
+                    Tower[] towers = FindObjectsOfType<Tower>();
+                    if (supplyTowerManager.GetTotalSupply() > 0)
                     {
-                        minMagnitudeDistance = offset.sqrMagnitude;
-                        resourceTarget = resources[i].gameObject;
+                        foreach (Tower tower in towers)
+                        {
+                            if (tower.GetCurrentSupply() + tower.GetPromisedSupply() < tower.GetMaxSupply() / 2)
+                            {
+                                
+                                int deliveringSupply = 0;
+                                if (tower.GetCurrentSupply() + harvestAmount > tower.GetMaxSupply())
+                                {
+                                    deliveringSupply = tower.GetMaxSupply() - tower.GetCurrentSupply();
+                                }
+                                else
+                                {
+                                    deliveringSupply = harvestAmount;
+                                }
+                                supplyStash = supplyTowerManager.RemoveSupply(deliveringSupply);
+                                tower.AddPromisedSupply(supplyStash);
+                                workerState = WorkerState.Moving;
+                                targetingCondition = TargetingCondition.MoveToTower;
+                                targetTower = tower;
+                                targetWaypoint = tower.transform.parent.gameObject.GetComponent<Waypoint>();
+                                MoveToTower();
+                                //TO DO: Handle no supply in base.
+                                return;
+                            }
+                        }
+                    }
+                    
+                    targetingCondition = TargetingCondition.MoveToResource;
+                    return;
+                }
+                else if (targetingCondition == TargetingCondition.MoveToBase)
+                {
+
+                    targetSupplyTower = null;
+                    if (currentWaypoint.GetSmartBaseWaypoints() != null && currentWaypoint.GetSmartBaseWaypoints().Length > 0)
+                    {
+                        targetSupplyTower = (SupplyTower)currentWaypoint.GetSmartBaseWaypoints()[0].targetWaypoint;
+                        targetWaypoint = targetSupplyTower;
+                        MoveToBase();
                     }
                 }
-                workerState = resourceTarget != null ? WorkerState.Moving : WorkerState.Idling;
-                targetingCondition = TargetingCondition.MoveToResource;
-                
+                else if (targetingCondition == TargetingCondition.MoveToResource)
+                {
+                    targetResource = null;
+
+                    if (currentWaypoint.GetResourceWaypoints() != null && currentWaypoint.GetResourceWaypoints().Length != 0)
+                    {
+                        for (int i = 0; i < currentWaypoint.GetResourceWaypoints().Length; i++)
+                        {
+                            if (((Resource)currentWaypoint.GetResourceWaypoints()[i].targetWaypoint).GetResources() > 0)
+                            {
+                                targetResource = (Resource)currentWaypoint.GetResourceWaypoints()[i].targetWaypoint;
+                                targetWaypoint = targetResource;
+                                MoveToResource();
+                                break;
+                            }
+                        }
+                    }
+                }
+                workerState = WorkerState.Moving;
                 break;
             case WorkerState.Moving:
-                
+
                 break;
             case WorkerState.Harvesting:
-                currentTime += Time.deltaTime;
-                if (currentTime >= harvestSpeed)
+                currentHarvestTime += Time.deltaTime;
+                if (currentHarvestTime >= harvestSpeed)
                 {
-                    supplyStash = resource.HarvestingResources(harvestAmount);
-                    currentTime = 0;
-                    workerState = WorkerState.Moving;
+                    supplyStash = targetResource.HarvestingResources(harvestAmount);
+                    currentHarvestTime = 0;
+                    workerState = WorkerState.Searching;
                     targetingCondition = TargetingCondition.MoveToBase;
                     //currentWaypoint.TrackSearch(this, currentWaypoint, new PathData());
                 }
                 break;
             case WorkerState.Delivering:
-                Debug.Log("Delivering " + supplyStash);
-                if (supplyTowerTarget != null)
+                if (targetingCondition == TargetingCondition.MoveToBase)
                 {
-                    supplyTowerTarget.AddSupply(supplyStash);
-                    supplyTowerTarget.SetSupplyUpdate(true);
+                    if (targetSupplyTower != null)
+                    {
+                        targetSupplyTower.AddSupply(supplyStash);
+                        targetSupplyTower.SetSupplyUpdate(true);
+                        supplyStash = 0;
+                        workerState = WorkerState.Searching;
+                        targetingCondition = TargetingCondition.MoveToTower;
+                    }
                 }
-                supplyStash = 0;
-                workerState = WorkerState.Searching;
+                else if (targetingCondition == TargetingCondition.MoveToTower)
+                {
+                    if (targetTower != null)
+                    {
+                        supplyStash = targetTower.AddSupply(supplyStash);
+                        workerState = WorkerState.Searching;
+                        targetingCondition = TargetingCondition.MoveToBase;
+                    }
+                }
+
                 break;
             case WorkerState.Idling:
                 break;
@@ -86,33 +158,103 @@ public class Worker : Unit
             base.Update();
         }
     }
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (workerState != WorkerState.Harvesting)
-        {
-            currentTime = 0;
-        }
-        SupplyTower supplyTowerCollided = other.GetComponent<SupplyTower>();
-        if (supplyTowerCollided)
-        {
-            if (supplyStash > 0)
-            {
-                workerState = WorkerState.Delivering;
-                targetingCondition = TargetingCondition.Idle;
-                supplyTowerTarget = supplyTowerCollided;
-                return;
-            }
 
-        }
-        Resource collidedResource = other.GetComponent<Resource>();
-        if (collidedResource)
+    
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject == movementTarget)
         {
-            if (collidedResource.GetResources() > 0)
+            currentWaypoint = collision.GetComponent<Waypoint>();
+            switch (targetingCondition)
             {
-                currentTime = 0;
-                workerState = WorkerState.Harvesting;
-                targetingCondition = TargetingCondition.Idle;
-                this.resource = collidedResource;
+                
+                case TargetingCondition.Waypoint:
+                    break;
+                case TargetingCondition.MoveToBase:
+
+                    MoveToBase();
+
+                    break;
+                case TargetingCondition.MoveToResource:
+
+                    MoveToResource();
+
+                    break;
+                case TargetingCondition.MoveToEnemyBase:
+                    break;
+                case TargetingCondition.MoveToTower:
+
+                    MoveToTower();
+
+                    break;
+                case TargetingCondition.Idle:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
+    void MoveToBase()
+    {
+        if (currentWaypoint == targetWaypoint )
+        {
+            workerState = WorkerState.Delivering;
+            //targetingCondition = TargetingCondition.Idle;
+        } 
+        else
+        {
+            //Keep on going.
+            List<TargetableWaypoint> targetableWaypoints = new List<TargetableWaypoint>(currentWaypoint.GetSmartBaseWaypoints());
+            TargetableWaypoint targetableWaypoint = targetableWaypoints.Find((x) => x.targetWaypoint == targetWaypoint);
+            if (targetableWaypoint.targetWaypoint != null)
+            {
+                if (targetableWaypoint.waypoints != null)
+                {
+                    movementTarget = targetableWaypoint.waypoints[UnityEngine.Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
+                }
+            }
+        }
+    }
+    void MoveToResource()
+    {
+        if (currentWaypoint == targetWaypoint)
+        {
+            workerState = WorkerState.Harvesting;
+            targetingCondition = TargetingCondition.Idle;
+        }
+        else
+        {
+            List<TargetableWaypoint> targetableWaypoints = new List<TargetableWaypoint>(currentWaypoint.GetResourceWaypoints());
+            TargetableWaypoint targetableWaypoint = targetableWaypoints.Find((x) => x.targetWaypoint == targetWaypoint);
+            if (targetableWaypoint.targetWaypoint != null)
+            {
+                if (targetableWaypoint.waypoints != null)
+                {
+                    movementTarget = targetableWaypoint.waypoints[UnityEngine.Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
+                }
+            }
+        }
+    }
+    void MoveToTower()
+    {
+        if (currentWaypoint == targetWaypoint)
+        {
+            workerState = WorkerState.Delivering;
+            //targetingCondition = TargetingCondition.Idle;
+        }
+        else
+        {
+            List<TargetableWaypoint> targetableWaypoints = new List<TargetableWaypoint>(currentWaypoint.GetTowerWaypoints());
+            TargetableWaypoint targetableWaypoint = targetableWaypoints.Find((x) => x.targetWaypoint == targetWaypoint);
+            if (targetableWaypoint.targetWaypoint != null)
+            {
+                if (targetableWaypoint.waypoints != null)
+                {
+                    movementTarget = targetableWaypoint.waypoints[UnityEngine.Random.Range(0, targetableWaypoint.waypoints.Length)].gameObject;
+                }
             }
         }
     }

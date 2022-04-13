@@ -44,11 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a37ecdf2be9fac54389962f8a415e2a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingCosts: 0
+  buildingCosts: 15
   rateOfAction: 1
-  supplyLoss: 0
-  maxSupply: 0
-  currentSupply: 0
+  supplyLoss: 1
+  supplyDrainTimer: 5
+  maxSupply: 20
+  currentSupply: 15
+  promisedSupply: 0
   range: 8
   damage: 1
   projectileObject: {fileID: 1083608025936448930, guid: 0020749f0e07baf4d9b543ccf3fae5f0, type: 3}

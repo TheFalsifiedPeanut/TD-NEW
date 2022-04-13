@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -53,15 +53,14 @@
     <UnityVersion>2021.2.6f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Assets\Scripts\Towers\ProjectileTower.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemyBase.cs" />
+    <Compile Include="Assets\Scripts\Economy\WorkerManager.cs" />
     <Compile Include="Assets\Scripts\Towers\TowerBase.cs" />
     <Compile Include="Assets\Scripts\Economy\Resource.cs" />
     <Compile Include="Assets\Scripts\Unit.cs" />
     <Compile Include="Assets\Scripts\Towers\Tower.cs" />
+    <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\Enemies\Enemy.cs" />
     <Compile Include="Assets\Scripts\Economy\Worker.cs" />
     <Compile Include="Assets\Scripts\Towers\PiercingTower.cs" />
@@ -70,10 +69,12 @@
     <Compile Include="Assets\Scripts\Towers\Projectile.cs" />
     <Compile Include="Assets\Scripts\Towers\SupplyTowerManager.cs" />
     <Compile Include="Assets\Scripts\Enemies\EnemyBaseManager.cs" />
+    <Compile Include="Assets\Scripts\Enemies\EnemyManager.cs" />
     <Compile Include="Assets\Scripts\Inputs\InputManager.cs" />
     <Compile Include="Assets\Scripts\Inputs\Background.cs" />
     <Compile Include="Assets\Scripts\Economy\Waypoint.cs" />
     <Compile Include="Assets\Scripts\Towers\RangedTower.cs" />
+    <Compile Include="Assets\Scripts\Enemies\DetectWorker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

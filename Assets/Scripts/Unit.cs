@@ -9,7 +9,8 @@ public enum TargetingCondition
     MoveToBase,
     MoveToResource,
     MoveToEnemyBase,
-    MoveToTower
+    MoveToTower,
+    MoveToUnit    
 }
 
 public class Unit : MonoBehaviour
